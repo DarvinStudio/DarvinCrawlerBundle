@@ -26,8 +26,8 @@ class Report
     private $failed;
 
     /**
-     * @param int $visited Count of visited URIs
-     * @param int $failed  Count of failed URIs
+     * @param int $visited Count of visited links
+     * @param int $failed  Count of failed links
      */
     public function __construct(int $visited, int $failed)
     {
@@ -44,10 +44,26 @@ class Report
     }
 
     /**
+     * @return bool
+     */
+    public function hasVisited(): bool
+    {
+        return $this->visited > 0;
+    }
+
+    /**
      * @return int
      */
     public function getFailed(): int
     {
         return $this->failed;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasFailed(): bool
+    {
+        return $this->failed > 0;
     }
 }

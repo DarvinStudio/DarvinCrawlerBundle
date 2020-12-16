@@ -87,8 +87,8 @@ class Crawler implements CrawlerInterface
      * @param callable $output        Output callback
      * @param string   $websiteScheme Website scheme
      * @param string   $websiteHost   Website host
-     * @param string[] $visited       Visited URIs
-     * @param string[] $failed        Failed URIs
+     * @param string[] $visited       Visited links
+     * @param string[] $failed        Failed links
      */
     private function visit(string $uri, callable $output, string $websiteScheme, string $websiteHost, array &$visited, array &$failed): void
     {

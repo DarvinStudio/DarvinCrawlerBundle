@@ -10,16 +10,39 @@
 
 namespace Darvin\CrawlerBundle\Crawler;
 
+use Goutte\Client;
+use Symfony\Component\HttpClient\HttpClient;
+
 /**
  * Crawler
  */
 class Crawler implements CrawlerInterface
 {
+    private const OPTIONS = [
+        'timeout' => 5,
+    ];
+
+    /**
+     * @var \Goutte\Client
+     */
+    private $client;
+
+    /**
+     * Crawler constructor.
+     */
+    public function __construct()
+    {
+        $this->client = new Client(HttpClient::create(self::OPTIONS));
+    }
+
     /**
      * {@inheritDoc}
      */
     public function crawl(string $uri, ?callable $output = null): void
     {
-        // TODO: Implement crawl() method.
+        if (null === $output) {
+            $output = function ($message, bool $error = false): void {
+            };
+        }
     }
 }

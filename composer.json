@@ -1,0 +1,20 @@
+{
+    "name": "darvinstudio/darvin-crawler-bundle",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Darvin Studio",
+            "email": "info@darvin-studio.ru",
+            "homepage": "https://www.darvin-studio.ru"
+        }
+    ],
+    "require": {
+        "fabpot/goutte": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Darvin\\CrawlerBundle\\": ""
+        }
+    }
+}

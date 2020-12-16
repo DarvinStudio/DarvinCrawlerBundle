@@ -85,9 +85,9 @@ class Crawler implements CrawlerInterface
     {
         $response = $this->client->request('GET', $uri);
 
-        $visited[] = $uri;
-
         $output($uri);
+
+        $visited[] = $uri;
 
         $domCrawler = new \Symfony\Component\DomCrawler\Crawler();
         $domCrawler->addHtmlContent($response->getContent());

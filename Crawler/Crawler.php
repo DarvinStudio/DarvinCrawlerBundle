@@ -11,6 +11,8 @@
 namespace Darvin\CrawlerBundle\Crawler;
 
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 /**
  * Crawler
@@ -85,16 +87,43 @@ class Crawler implements CrawlerInterface
     {
         $response = $this->client->request('GET', $uri);
 
-        $output($uri);
-
         $visited[] = $uri;
 
-        if (false === strpos($response->getHeaders()['content-type'][0] ?? '', 'html')) {
+        try {
+            $statusCode = $response->getStatusCode();
+        } catch (TransportExceptionInterface $ex) {
+            $this->outputError($ex, $uri, $output);
+
+            return;
+        }
+        if ($statusCode >= 300) {
+            $output(implode(': ', [$statusCode, $uri]), true);
+
+            return;
+        }
+        try {
+            $headers = $response->getHeaders();
+        } catch (ExceptionInterface $ex) {
+            $this->outputError($ex, $uri, $output);
+
+            return;
+        }
+
+        $output(implode(': ', [$statusCode, $uri]));
+
+        if (false === strpos($headers['content-type'][0] ?? '', 'html')) {
+            return;
+        }
+        try {
+            $content = $response->getContent();
+        } catch (ExceptionInterface $ex) {
+            $this->outputError($ex, $uri, $output);
+
             return;
         }
 
         /** @var \DOMElement[] $nodes */
-        $nodes = (new \Symfony\Component\DomCrawler\Crawler($response->getContent()))->filter(implode(', ', array_map(function (string $attribute): string {
+        $nodes = (new \Symfony\Component\DomCrawler\Crawler($content))->filter(implode(', ', array_map(function (string $attribute): string {
             return sprintf('[%s]', $attribute);
         }, self::ATTRIBUTES)));
 
@@ -128,5 +157,15 @@ class Crawler implements CrawlerInterface
                 }
             }
         }
+    }
+
+    /**
+     * @param \Throwable $ex     Exception
+     * @param string     $uri    URI
+     * @param callable   $output Output callback
+     */
+    private function outputError(\Throwable $ex, string $uri, callable $output): void
+    {
+        $output(implode(': ', [$uri, $ex->getMessage()]), true);
     }
 }

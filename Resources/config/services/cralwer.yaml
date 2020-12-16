@@ -1,0 +1,8 @@
+parameters:
+    darvin_crawler.crawler.class: Darvin\CrawlerBundle\Crawler\Crawler
+
+services:
+    Darvin\CrawlerBundle\Crawler\CrawlerInterface: '@darvin_crawler.crawler'
+
+    darvin_crawler.crawler:
+        class: '%darvin_crawler.crawler.class%'

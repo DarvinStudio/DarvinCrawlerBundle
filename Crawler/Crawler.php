@@ -89,6 +89,10 @@ class Crawler implements CrawlerInterface
 
         $visited[] = $uri;
 
+        if (false === strpos($response->getHeaders()['content-type'][0] ?? '', 'html')) {
+            return;
+        }
+
         $domCrawler = new \Symfony\Component\DomCrawler\Crawler();
         $domCrawler->addHtmlContent($response->getContent());
 

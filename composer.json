@@ -10,7 +10,9 @@
         }
     ],
     "require": {
-        "fabpot/goutte": "*"
+        "symfony/css-selector": "*",
+        "symfony/dom-crawler": "*",
+        "symfony/http-client": "*"
     },
     "autoload": {
         "psr-4": {

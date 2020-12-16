@@ -10,7 +10,6 @@
 
 namespace Darvin\CrawlerBundle\Crawler;
 
-use Goutte\Client;
 use Symfony\Component\HttpClient\HttpClient;
 
 /**
@@ -33,7 +32,7 @@ class Crawler implements CrawlerInterface
     ];
 
     /**
-     * @var \Goutte\Client
+     * @var \Symfony\Contracts\HttpClient\HttpClientInterface
      */
     private $client;
 
@@ -42,7 +41,7 @@ class Crawler implements CrawlerInterface
      */
     public function __construct()
     {
-        $this->client = new Client(HttpClient::create(self::OPTIONS));
+        $this->client = HttpClient::create(self::OPTIONS);
     }
 
     /**
@@ -80,51 +79,53 @@ class Crawler implements CrawlerInterface
      * @param callable $output        Output callback
      * @param string   $websiteScheme Website scheme
      * @param string   $websiteHost   Website host
+     * @param string[] $visited       Visited URIs
      */
-    private function crawlUri(string $uri, callable $output, string $websiteScheme, string $websiteHost): void
+    private function crawlUri(string $uri, callable $output, string $websiteScheme, string $websiteHost, array &$visited = []): void
     {
-        $crawler = $this->client->request('GET', $uri);
+        $response = $this->client->request('GET', $uri);
+
+        $visited[] = $uri;
 
         $output($uri);
 
+        $domCrawler = new \Symfony\Component\DomCrawler\Crawler();
+        $domCrawler->addHtmlContent($response->getContent());
+
         /** @var \DOMElement[] $nodes */
-        $nodes = $crawler->filter(implode(', ', array_map(function (string $attribute): string {
+        $nodes = $domCrawler->filter(implode(', ', array_map(function (string $attribute): string {
             return sprintf('[%s]', $attribute);
         }, self::ATTRIBUTES)));
 
-        $links = [];
-
         foreach ($nodes as $node) {
             foreach (self::ATTRIBUTES as $attr) {
-                if ($node->hasAttribute($attr)) {
-                    $link = $node->getAttribute($attr);
+                if (!$node->hasAttribute($attr)) {
+                    continue;
+                }
 
-                    if ('' === $link || in_array($link, $links)) {
-                        continue;
-                    }
+                $link = $node->getAttribute($attr);
 
-                    $scheme = parse_url($link, PHP_URL_SCHEME);
+                if ('' === $link) {
+                    continue;
+                }
 
-                    if (null !== $scheme && !in_array($scheme, self::SCHEMES)) {
-                        continue;
-                    }
-                    if (null === $scheme) {
-                        $scheme = $websiteScheme;
+                $scheme = parse_url($link, PHP_URL_SCHEME);
 
-                        $link = sprintf('%s://%s%s', $scheme, $websiteHost, $link);
-                    }
+                if (null !== $scheme && !in_array($scheme, self::SCHEMES)) {
+                    continue;
+                }
+                if (null === $scheme) {
+                    $scheme = $websiteScheme;
 
-                    $host = parse_url($link, PHP_URL_HOST);
+                    $link = sprintf('%s://%s%s', $scheme, $websiteHost, $link);
+                }
 
-                    if ($host !== $websiteHost) {
-                        continue;
-                    }
+                $host = parse_url($link, PHP_URL_HOST);
 
-                    $links[] = $link;
+                if ($host === $websiteHost && !in_array($link, $visited) && !in_array(rtrim($link, '/'), $visited)) {
+                    $this->crawlUri($link, $output, $websiteScheme, $websiteHost, $visited);
                 }
             }
         }
-
-        dump($links);
     }
 }

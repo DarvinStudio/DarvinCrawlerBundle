@@ -18,8 +18,18 @@ use Symfony\Component\HttpClient\HttpClient;
  */
 class Crawler implements CrawlerInterface
 {
+    private const ATTRIBUTES = [
+        'href',
+        'src',
+    ];
+
     private const OPTIONS = [
         'timeout' => 5,
+    ];
+
+    private const SCHEMES = [
+        'http',
+        'https',
     ];
 
     /**
@@ -45,24 +55,76 @@ class Crawler implements CrawlerInterface
             };
         }
 
+        $scheme = parse_url($uri, PHP_URL_SCHEME);
+
+        if (null === $scheme) {
+            $scheme = 'http';
+
+            $uri = implode('://', [$scheme, $uri]);
+        }
+        if (!in_array($scheme, self::SCHEMES)) {
+            throw new \InvalidArgumentException(sprintf('Scheme "%s" is not supported.', $scheme));
+        }
+
         $host = parse_url($uri, PHP_URL_HOST);
 
         if (null === $host) {
-            $host = $uri;
-
-            $uri = sprintf('http://%s', $host);
+            throw new \InvalidArgumentException(sprintf('Unable to parse URI "%s".', $uri));
         }
 
-        $this->crawlUri($uri, $output, $host);
+        $this->crawlUri($uri, $output, $scheme, $host);
     }
 
     /**
-     * @param string   $uri    URI
-     * @param callable $output Output callback
-     * @param string   $host   Host
+     * @param string   $uri           URI
+     * @param callable $output        Output callback
+     * @param string   $websiteScheme Website scheme
+     * @param string   $websiteHost   Website host
      */
-    private function crawlUri(string $uri, callable $output, string $host): void
+    private function crawlUri(string $uri, callable $output, string $websiteScheme, string $websiteHost): void
     {
+        $crawler = $this->client->request('GET', $uri);
 
+        $output($uri);
+
+        /** @var \DOMElement[] $nodes */
+        $nodes = $crawler->filter(implode(', ', array_map(function (string $attribute): string {
+            return sprintf('[%s]', $attribute);
+        }, self::ATTRIBUTES)));
+
+        $links = [];
+
+        foreach ($nodes as $node) {
+            foreach (self::ATTRIBUTES as $attr) {
+                if ($node->hasAttribute($attr)) {
+                    $link = $node->getAttribute($attr);
+
+                    if ('' === $link || in_array($link, $links)) {
+                        continue;
+                    }
+
+                    $scheme = parse_url($link, PHP_URL_SCHEME);
+
+                    if (null !== $scheme && !in_array($scheme, self::SCHEMES)) {
+                        continue;
+                    }
+                    if (null === $scheme) {
+                        $scheme = $websiteScheme;
+
+                        $link = sprintf('%s://%s%s', $scheme, $websiteHost, $link);
+                    }
+
+                    $host = parse_url($link, PHP_URL_HOST);
+
+                    if ($host !== $websiteHost) {
+                        continue;
+                    }
+
+                    $links[] = $link;
+                }
+            }
+        }
+
+        dump($links);
     }
 }

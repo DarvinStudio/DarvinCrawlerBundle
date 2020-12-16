@@ -67,8 +67,6 @@ class CrawlCommand extends Command
             }
         });
 
-        $io->info(sprintf('Links visited: %d.', $report->getVisited()));
-
         $failed = sprintf('Links failed: %d.', $report->getFailed());
 
         if ($report->hasFailed()) {
@@ -76,6 +74,8 @@ class CrawlCommand extends Command
         } else {
             $io->success($failed);
         }
+
+        $io->info(sprintf('Links visited: %d.', $report->getVisited()));
 
         return 0;
     }

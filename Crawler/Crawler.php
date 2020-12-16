@@ -73,21 +73,21 @@ class Crawler implements CrawlerInterface
             throw new \InvalidArgumentException(sprintf('Unable to parse URI "%s".', $uri));
         }
 
-        $this->crawlUri($uri, $output, $scheme, $host);
+        $this->visit($uri, $output, $scheme, $host);
     }
 
     /**
-     * @param string   $uri           URI
+     * @param string   $uri           URI to visit
      * @param callable $output        Output callback
      * @param string   $websiteScheme Website scheme
      * @param string   $websiteHost   Website host
      * @param string[] $visited       Visited URIs
      */
-    private function crawlUri(string $uri, callable $output, string $websiteScheme, string $websiteHost, array &$visited = []): void
+    private function visit(string $uri, callable $output, string $websiteScheme, string $websiteHost, array &$visited = []): void
     {
-        $response = $this->client->request('GET', $uri);
-
         $visited[] = $uri;
+
+        $response = $this->client->request('GET', $uri);
 
         try {
             $statusCode = $response->getStatusCode();
@@ -153,7 +153,7 @@ class Crawler implements CrawlerInterface
                 $host = parse_url($link, PHP_URL_HOST);
 
                 if ($host === $websiteHost && !in_array($link, $visited) && !in_array(rtrim($link, '/'), $visited)) {
-                    $this->crawlUri($link, $output, $websiteScheme, $websiteHost, $visited);
+                    $this->visit($link, $output, $websiteScheme, $websiteHost, $visited);
                 }
             }
         }

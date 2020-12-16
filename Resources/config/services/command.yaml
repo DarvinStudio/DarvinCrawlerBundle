@@ -4,5 +4,7 @@ parameters:
 services:
     darvin_crawler.command.crawl:
         class: '%darvin_crawler.command.crawl.class%'
+        arguments:
+            - '@darvin_crawler.crawler'
         tags:
             - { name: console.command }

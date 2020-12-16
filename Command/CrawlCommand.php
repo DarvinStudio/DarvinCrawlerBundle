@@ -10,9 +10,12 @@
 
 namespace Darvin\CrawlerBundle\Command;
 
+use Darvin\CrawlerBundle\Crawler\CrawlerInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Crawl command
@@ -20,11 +23,30 @@ use Symfony\Component\Console\Output\OutputInterface;
 class CrawlCommand extends Command
 {
     /**
+     * @var \Darvin\CrawlerBundle\Crawler\CrawlerInterface
+     */
+    private $crawler;
+
+    /**
+     * @param \Darvin\CrawlerBundle\Crawler\CrawlerInterface $crawler Crawler
+     */
+    public function __construct(CrawlerInterface $crawler)
+    {
+        parent::__construct();
+
+        $this->crawler = $crawler;
+    }
+
+    /**
      * {@inheritDoc}
      */
     protected function configure(): void
     {
-        $this->setName('darvin:crawler:crawl');
+        $this
+            ->setName('darvin:crawler:crawl')
+            ->setDefinition([
+                new InputArgument('uri', InputArgument::REQUIRED),
+            ]);
     }
 
     /**
@@ -32,6 +54,16 @@ class CrawlCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $io = new SymfonyStyle($input, $output);
+
+        $this->crawler->crawl($input->getArgument('uri'), function ($message, bool $error = false) use ($io): void {
+            if ($error) {
+                $io->error($message);
+            } else {
+                $io->writeln($message);
+            }
+        });
+
         return 0;
     }
 }

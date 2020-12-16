@@ -96,12 +96,16 @@ class Crawler implements CrawlerInterface
 
         $response = $this->client->request('GET', $uri);
 
+        $handleException = function (\Throwable $ex) use ($uri, $output, &$failed) {
+            $output(implode(': ', [$uri, $ex->getMessage()]), true);
+
+            $failed[] = $uri;
+        };
+
         try {
             $statusCode = $response->getStatusCode();
         } catch (TransportExceptionInterface $ex) {
-            $failed[] = $uri;
-
-            $this->outputError($ex, $uri, $output);
+            $handleException($ex);
 
             return;
         }
@@ -115,9 +119,7 @@ class Crawler implements CrawlerInterface
         try {
             $headers = $response->getHeaders();
         } catch (ExceptionInterface $ex) {
-            $failed[] = $uri;
-
-            $this->outputError($ex, $uri, $output);
+            $handleException($ex);
 
             return;
         }
@@ -130,9 +132,7 @@ class Crawler implements CrawlerInterface
         try {
             $content = $response->getContent();
         } catch (ExceptionInterface $ex) {
-            $failed[] = $uri;
-
-            $this->outputError($ex, $uri, $output);
+            $handleException($ex);
 
             return;
         }
@@ -172,15 +172,5 @@ class Crawler implements CrawlerInterface
                 }
             }
         }
-    }
-
-    /**
-     * @param \Throwable $ex     Exception
-     * @param string     $uri    URI
-     * @param callable   $output Output callback
-     */
-    private function outputError(\Throwable $ex, string $uri, callable $output): void
-    {
-        $output(implode(': ', [$uri, $ex->getMessage()]), true);
     }
 }

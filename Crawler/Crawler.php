@@ -44,5 +44,25 @@ class Crawler implements CrawlerInterface
             $output = function ($message, bool $error = false): void {
             };
         }
+
+        $host = parse_url($uri, PHP_URL_HOST);
+
+        if (null === $host) {
+            $host = $uri;
+
+            $uri = sprintf('http://%s', $host);
+        }
+
+        $this->crawlUri($uri, $output, $host);
+    }
+
+    /**
+     * @param string   $uri    URI
+     * @param callable $output Output callback
+     * @param string   $host   Host
+     */
+    private function crawlUri(string $uri, callable $output, string $host): void
+    {
+
     }
 }

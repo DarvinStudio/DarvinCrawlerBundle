@@ -18,6 +18,8 @@ interface CrawlerInterface
     /**
      * @param string        $uri    URI
      * @param callable|null $output Output callback
+     *
+     * @throws \InvalidArgumentException
      */
     public function crawl(string $uri, ?callable $output = null): void;
 }

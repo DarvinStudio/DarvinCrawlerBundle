@@ -96,7 +96,7 @@ class Crawler implements CrawlerInterface
 
         $response = $this->client->request('GET', $uri);
 
-        $handleException = function (\Throwable $ex) use ($uri, $output, &$failed) {
+        $handleException = function (\Throwable $ex) use ($uri, $output, &$failed): void {
             $output(implode(': ', [$uri, $ex->getMessage()]), true);
 
             $failed[] = $uri;

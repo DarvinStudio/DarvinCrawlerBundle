@@ -59,7 +59,10 @@ class CrawlCommand extends Command
         $this->crawler->crawl($input->getArgument('uri'), function ($message, bool $error = false) use ($io): void {
             if ($error) {
                 $io->error($message);
-            } else {
+
+                return;
+            }
+            if ($io->isVerbose()) {
                 $io->writeln($message);
             }
         });

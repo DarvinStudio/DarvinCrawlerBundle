@@ -93,11 +93,8 @@ class Crawler implements CrawlerInterface
             return;
         }
 
-        $domCrawler = new \Symfony\Component\DomCrawler\Crawler();
-        $domCrawler->addHtmlContent($response->getContent());
-
         /** @var \DOMElement[] $nodes */
-        $nodes = $domCrawler->filter(implode(', ', array_map(function (string $attribute): string {
+        $nodes = (new \Symfony\Component\DomCrawler\Crawler($response->getContent()))->filter(implode(', ', array_map(function (string $attribute): string {
             return sprintf('[%s]', $attribute);
         }, self::ATTRIBUTES)));
 

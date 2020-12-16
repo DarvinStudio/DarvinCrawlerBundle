@@ -44,14 +44,6 @@ class Report
     }
 
     /**
-     * @return bool
-     */
-    public function hasVisited(): bool
-    {
-        return $this->visited > 0;
-    }
-
-    /**
      * @return int
      */
     public function getFailed(): int

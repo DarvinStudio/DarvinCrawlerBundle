@@ -69,12 +69,12 @@ class CrawlCommand extends Command
 
         $io->info(sprintf('Links visited: %d.', $report->getVisited()));
 
-        $failedMessage = sprintf('Links failed: %d.', $report->getFailed());
+        $failed = sprintf('Links failed: %d.', $report->getFailed());
 
         if ($report->hasFailed()) {
-            $io->error($failedMessage);
+            $io->error($failed);
         } else {
-            $io->success($failedMessage);
+            $io->success($failed);
         }
 
         return 0;

@@ -56,7 +56,7 @@ class CrawlCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $this->crawler->crawl($input->getArgument('uri'), function ($message, bool $error = false) use ($io): void {
+        $report = $this->crawler->crawl($input->getArgument('uri'), function ($message, bool $error = false) use ($io): void {
             if ($error) {
                 $io->error($message);
 
@@ -66,6 +66,9 @@ class CrawlCommand extends Command
                 $io->writeln($message);
             }
         });
+
+        $io->info(sprintf('URIs visited: %d.', $report->getVisited()));
+        $io->info(sprintf('URIs failed: %s.', $report->getFailed()));
 
         return 0;
     }

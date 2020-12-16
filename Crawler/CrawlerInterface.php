@@ -10,6 +10,8 @@
 
 namespace Darvin\CrawlerBundle\Crawler;
 
+use Darvin\CrawlerBundle\Report\Report;
+
 /**
  * Crawler
  */
@@ -19,7 +21,8 @@ interface CrawlerInterface
      * @param string        $uri    URI
      * @param callable|null $output Output callback
      *
+     * @return \Darvin\CrawlerBundle\Report\Report
      * @throws \InvalidArgumentException
      */
-    public function crawl(string $uri, ?callable $output = null): void;
+    public function crawl(string $uri, ?callable $output = null): Report;
 }

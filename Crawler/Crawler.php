@@ -10,6 +10,7 @@
 
 namespace Darvin\CrawlerBundle\Crawler;
 
+use Darvin\CrawlerBundle\Report\Report;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -49,7 +50,7 @@ class Crawler implements CrawlerInterface
     /**
      * {@inheritDoc}
      */
-    public function crawl(string $uri, ?callable $output = null): void
+    public function crawl(string $uri, ?callable $output = null): Report
     {
         if (null === $output) {
             $output = function ($message, bool $error = false): void {
@@ -73,7 +74,12 @@ class Crawler implements CrawlerInterface
             throw new \InvalidArgumentException(sprintf('Unable to parse URI "%s".', $uri));
         }
 
-        $this->visit($uri, $output, $scheme, $host);
+        $visited = [];
+        $failed = [];
+
+        $this->visit($uri, $output, $scheme, $host, $visited, $failed);
+
+        return new Report(count($visited), count($failed));
     }
 
     /**
@@ -82,8 +88,9 @@ class Crawler implements CrawlerInterface
      * @param string   $websiteScheme Website scheme
      * @param string   $websiteHost   Website host
      * @param string[] $visited       Visited URIs
+     * @param string[] $failed        Failed URIs
      */
-    private function visit(string $uri, callable $output, string $websiteScheme, string $websiteHost, array &$visited = []): void
+    private function visit(string $uri, callable $output, string $websiteScheme, string $websiteHost, array &$visited, array &$failed): void
     {
         $visited[] = $uri;
 
@@ -92,11 +99,15 @@ class Crawler implements CrawlerInterface
         try {
             $statusCode = $response->getStatusCode();
         } catch (TransportExceptionInterface $ex) {
+            $failed[] = $uri;
+
             $this->outputError($ex, $uri, $output);
 
             return;
         }
         if ($statusCode >= 300) {
+            $failed[] = $uri;
+
             $output(implode(': ', [$statusCode, $uri]), true);
 
             return;
@@ -104,6 +115,8 @@ class Crawler implements CrawlerInterface
         try {
             $headers = $response->getHeaders();
         } catch (ExceptionInterface $ex) {
+            $failed[] = $uri;
+
             $this->outputError($ex, $uri, $output);
 
             return;
@@ -117,6 +130,8 @@ class Crawler implements CrawlerInterface
         try {
             $content = $response->getContent();
         } catch (ExceptionInterface $ex) {
+            $failed[] = $uri;
+
             $this->outputError($ex, $uri, $output);
 
             return;
@@ -153,7 +168,7 @@ class Crawler implements CrawlerInterface
                 $host = parse_url($link, PHP_URL_HOST);
 
                 if ($host === $websiteHost && !in_array($link, $visited) && !in_array(rtrim($link, '/'), $visited)) {
-                    $this->visit($link, $output, $websiteScheme, $websiteHost, $visited);
+                    $this->visit($link, $output, $websiteScheme, $websiteHost, $visited, $failed);
                 }
             }
         }

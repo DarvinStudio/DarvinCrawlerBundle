@@ -36,11 +36,25 @@ class Crawler implements CrawlerInterface
     private $client;
 
     /**
-     * @param \Symfony\Contracts\HttpClient\HttpClientInterface $client HTTP client
+     * @var string[]
      */
-    public function __construct(HttpClientInterface $client)
+    private $parseBlacklist;
+
+    /**
+     * @var string[]
+     */
+    private $visitBlacklist;
+
+    /**
+     * @param \Symfony\Contracts\HttpClient\HttpClientInterface $client         HTTP client
+     * @param string[]                                          $parseBlacklist Parse blacklist
+     * @param string[]                                          $visitBlacklist Visit blacklist
+     */
+    public function __construct(HttpClientInterface $client, array $parseBlacklist, array $visitBlacklist)
     {
         $this->client = $client;
+        $this->parseBlacklist = $parseBlacklist;
+        $this->visitBlacklist = $visitBlacklist;
     }
 
     /**
@@ -183,5 +197,22 @@ class Crawler implements CrawlerInterface
                 }
             }
         }
+    }
+
+    /**
+     * @param string   $uri       URI
+     * @param string[] $blacklist Blacklist
+     *
+     * @return bool
+     */
+    private function isBlacklisted(string $uri, array $blacklist): bool
+    {
+        foreach ($blacklist as $regex) {
+            if (preg_match($regex, $uri)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

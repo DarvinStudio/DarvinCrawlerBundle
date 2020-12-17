@@ -26,7 +26,9 @@ class DarvinCrawlerExtension extends Extension
     {
         $config = $this->processConfiguration(new Configuration(), $configs);
 
-        $container->setParameter(sprintf('%s.default_uri', $this->getAlias()), $config['default_uri']);
+        $container->setParameter('darvin_crawler.default_uri', $config['default_uri']);
+        $container->setParameter('darvin_crawler.blacklists.parse', $config['blacklists']['parse']);
+        $container->setParameter('darvin_crawler.blacklists.visit', $config['blacklists']['visit']);
 
         (new ConfigLoader($container, __DIR__.'/../Resources/config/services'))->load([
             'command',

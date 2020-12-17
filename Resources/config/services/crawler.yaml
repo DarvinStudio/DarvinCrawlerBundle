@@ -8,3 +8,5 @@ services:
         class: '%darvin_crawler.crawler.class%'
         arguments:
             - '@darvin_crawler.http.client'
+            - '%darvin_crawler.blacklists.parse%'
+            - '%darvin_crawler.blacklists.visit%'

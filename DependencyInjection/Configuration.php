@@ -10,6 +10,7 @@
 
 namespace Darvin\CrawlerBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -26,8 +27,30 @@ class Configuration implements ConfigurationInterface
         $builder = new TreeBuilder('darvin_crawler');
         $builder->getRootNode()
             ->children()
-                ->scalarNode('default_uri')->defaultNull();
+                ->scalarNode('default_uri')->defaultNull()->end()
+                ->arrayNode('blacklists')->addDefaultsIfNotSet()
+                    ->children()
+                        ->append($this->buildBlacklistNode('parse'))
+                        ->append($this->buildBlacklistNode('visit'));
 
         return $builder;
+    }
+
+    /**
+     * @param string $name Node name
+     *
+     * @return \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition
+     */
+    private function buildBlacklistNode(string $name): ArrayNodeDefinition
+    {
+        $node = (new TreeBuilder($name))->getRootNode();
+        $node
+            ->prototype('scalar')->cannotBeEmpty()
+                ->validate()
+                    ->ifTrue(function ($regex): bool {
+                        return false === @preg_match((string)$regex, '');
+                    })->thenInvalid('%s is not valid regex.');
+
+        return $node;
     }
 }

@@ -128,15 +128,28 @@ class Crawler implements CrawlerInterface
             return;
         }
         try {
-            $content = $response->getContent();
+            $html = $response->getContent();
         } catch (ExceptionInterface $ex) {
             $handleError($ex);
 
             return;
         }
 
+        $this->parse($html, $output, $websiteScheme, $websiteHost, $visited, $broken);
+    }
+
+    /**
+     * @param string   $html          HTML
+     * @param callable $output        Output callback
+     * @param string   $websiteScheme Website scheme
+     * @param string   $websiteHost   Website host
+     * @param string[] $visited       Visited links
+     * @param string[] $broken        Broken links
+     */
+    private function parse(string $html, callable $output, string $websiteScheme, string $websiteHost, array &$visited, array &$broken): void
+    {
         /** @var \DOMElement[] $nodes */
-        $nodes = (new \Symfony\Component\DomCrawler\Crawler($content))->filter(implode(', ', array_map(function (string $attribute): string {
+        $nodes = (new \Symfony\Component\DomCrawler\Crawler($html))->filter(implode(', ', array_map(function (string $attribute): string {
             return sprintf('[%s]', $attribute);
         }, self::ATTRIBUTES)));
 

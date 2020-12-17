@@ -10,6 +10,7 @@
         }
     ],
     "require": {
+        "symfony/console": "*",
         "symfony/css-selector": "*",
         "symfony/dom-crawler": "*",
         "symfony/http-client": "*"

@@ -141,6 +141,9 @@ class Crawler implements CrawlerInterface
         if (isset($headers['content-type'][0]) && false === strpos($headers['content-type'][0], 'html')) {
             return;
         }
+        if ($this->isBlacklisted($uri, $this->parseBlacklist)) {
+            return;
+        }
         try {
             $html = $response->getContent();
         } catch (ExceptionInterface $ex) {
@@ -192,7 +195,11 @@ class Crawler implements CrawlerInterface
 
                 $host = parse_url($link, PHP_URL_HOST);
 
-                if ($host === $websiteHost && !in_array($link, $visited) && !in_array(rtrim($link, '/'), $visited)) {
+                if ($host === $websiteHost
+                    && !in_array($link, $visited)
+                    && !in_array(rtrim($link, '/'), $visited)
+                    && !$this->isBlacklisted($link, $this->visitBlacklist)
+                ) {
                     $this->visit($link, $output, $websiteScheme, $websiteHost, $visited, $broken);
                 }
             }

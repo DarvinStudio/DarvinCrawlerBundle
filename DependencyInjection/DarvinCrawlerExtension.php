@@ -31,6 +31,7 @@ class DarvinCrawlerExtension extends Extension
         (new ConfigLoader($container, __DIR__.'/../Resources/config/services'))->load([
             'command',
             'crawler',
+            'http',
         ]);
     }
 }

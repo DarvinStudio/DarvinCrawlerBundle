@@ -6,3 +6,5 @@ services:
 
     darvin_crawler.crawler:
         class: '%darvin_crawler.crawler.class%'
+        arguments:
+            - '@darvin_crawler.http.client'

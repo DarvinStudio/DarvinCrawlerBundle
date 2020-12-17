@@ -11,9 +11,9 @@
 namespace Darvin\CrawlerBundle\Crawler;
 
 use Darvin\CrawlerBundle\Report\Report;
-use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Crawler
@@ -23,10 +23,6 @@ class Crawler implements CrawlerInterface
     private const ATTRIBUTES = [
         'href',
         'src',
-    ];
-
-    private const OPTIONS = [
-        'timeout' => 5,
     ];
 
     private const SCHEMES = [
@@ -40,11 +36,11 @@ class Crawler implements CrawlerInterface
     private $client;
 
     /**
-     * Crawler constructor.
+     * @param \Symfony\Contracts\HttpClient\HttpClientInterface $client HTTP client
      */
-    public function __construct()
+    public function __construct(HttpClientInterface $client)
     {
-        $this->client = HttpClient::create(self::OPTIONS);
+        $this->client = $client;
     }
 
     /**

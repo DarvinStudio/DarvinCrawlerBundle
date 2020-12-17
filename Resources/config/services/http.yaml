@@ -1,0 +1,12 @@
+parameters:
+    darvin_crawler.http.client.class:          Symfony\Contracts\HttpClient\HttpClientInterface
+    darvin_crawler.http.client.factory.class:  Symfony\Component\HttpClient\HttpClient
+    darvin_crawler.http.client.factory.method: create
+    darvin_crawler.http.client.options:        { timeout: 5 }
+
+services:
+    darvin_crawler.http.client:
+        class:   '%darvin_crawler.http.client.class%'
+        factory: [ !service { class: '%darvin_crawler.http.client.factory.class%' }, '%darvin_crawler.http.client.factory.method%' ]
+        arguments:
+            - '%darvin_crawler.http.client.options%'

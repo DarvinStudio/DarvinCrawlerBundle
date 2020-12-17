@@ -28,13 +28,20 @@ class CrawlCommand extends Command
     private $crawler;
 
     /**
-     * @param \Darvin\CrawlerBundle\Crawler\CrawlerInterface $crawler Crawler
+     * @var string|null
      */
-    public function __construct(CrawlerInterface $crawler)
-    {
-        parent::__construct();
+    private $defaultUri;
 
+    /**
+     * @param \Darvin\CrawlerBundle\Crawler\CrawlerInterface $crawler    Crawler
+     * @param string|null                                    $defaultUri Default URI
+     */
+    public function __construct(CrawlerInterface $crawler, ?string $defaultUri)
+    {
         $this->crawler = $crawler;
+        $this->defaultUri = $defaultUri;
+
+        parent::__construct();
     }
 
     /**
@@ -45,7 +52,7 @@ class CrawlCommand extends Command
         $this
             ->setName('darvin:crawler:crawl')
             ->setDefinition([
-                new InputArgument('uri', InputArgument::REQUIRED),
+                new InputArgument('uri', null !== $this->defaultUri ? InputArgument::OPTIONAL : InputArgument::REQUIRED, '', $this->defaultUri),
             ]);
     }
 

@@ -24,6 +24,10 @@ class DarvinCrawlerExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
+        $config = $this->processConfiguration(new Configuration(), $configs);
+
+        $container->setParameter(sprintf('%s.uri', $this->getAlias()), $config['uri']);
+
         (new ConfigLoader($container, __DIR__.'/../Resources/config/services'))->load([
             'command',
             'crawler',

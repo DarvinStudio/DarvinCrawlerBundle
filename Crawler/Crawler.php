@@ -75,35 +75,35 @@ class Crawler implements CrawlerInterface
         }
 
         $visited = [];
-        $failed = [];
+        $broken  = [];
 
-        $this->visit($uri, $output, $scheme, $host, $visited, $failed);
+        $this->visit($uri, $output, $scheme, $host, $visited, $broken);
 
-        return new Report(count($visited), count($failed));
+        return new Report($visited, $broken);
     }
 
     /**
-     * @param string   $uri           URI to visit
+     * @param string   $uri           URI
      * @param callable $output        Output callback
      * @param string   $websiteScheme Website scheme
      * @param string   $websiteHost   Website host
      * @param string[] $visited       Visited links
-     * @param string[] $failed        Failed links
+     * @param string[] $broken        Broken links
      */
-    private function visit(string $uri, callable $output, string $websiteScheme, string $websiteHost, array &$visited, array &$failed): void
+    private function visit(string $uri, callable $output, string $websiteScheme, string $websiteHost, array &$visited, array &$broken): void
     {
         $visited[] = $uri;
 
         $response = $this->client->request('GET', $uri);
 
-        $handleError = function (?\Throwable $ex, string $message = '') use ($uri, $output, &$failed): void {
+        $handleError = function (?\Throwable $ex, string $message = '') use ($uri, $output, &$broken): void {
             if ('' === $message) {
                 $message = implode(': ', [$uri, $ex->getMessage()]);
             }
 
             $output($message, true);
 
-            $failed[] = $uri;
+            $broken[] = $uri;
         };
 
         try {
@@ -170,7 +170,7 @@ class Crawler implements CrawlerInterface
                 $host = parse_url($link, PHP_URL_HOST);
 
                 if ($host === $websiteHost && !in_array($link, $visited) && !in_array(rtrim($link, '/'), $visited)) {
-                    $this->visit($link, $output, $websiteScheme, $websiteHost, $visited, $failed);
+                    $this->visit($link, $output, $websiteScheme, $websiteHost, $visited, $broken);
                 }
             }
         }

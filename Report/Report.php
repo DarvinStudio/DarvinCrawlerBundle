@@ -16,46 +16,38 @@ namespace Darvin\CrawlerBundle\Report;
 class Report
 {
     /**
-     * @var int
+     * @var string[]
      */
     private $visited;
 
     /**
-     * @var int
+     * @var string[]
      */
-    private $failed;
+    private $broken;
 
     /**
-     * @param int $visited Count of visited links
-     * @param int $failed  Count of failed links
+     * @param string[] $visited Visited links
+     * @param string[] $broken  Broken links
      */
-    public function __construct(int $visited, int $failed)
+    public function __construct(array $visited, array $broken)
     {
         $this->visited = $visited;
-        $this->failed = $failed;
+        $this->broken = $broken;
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getVisited(): int
+    public function __toString(): string
     {
-        return $this->visited;
-    }
-
-    /**
-     * @return int
-     */
-    public function getFailed(): int
-    {
-        return $this->failed;
+        return sprintf('%d/%d links are broken.', count($this->broken), count($this->visited));
     }
 
     /**
      * @return bool
      */
-    public function hasFailed(): bool
+    public function isSuccessful(): bool
     {
-        return $this->failed > 0;
+        return empty($this->broken);
     }
 }

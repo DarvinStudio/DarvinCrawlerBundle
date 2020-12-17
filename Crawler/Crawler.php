@@ -128,7 +128,7 @@ class Crawler implements CrawlerInterface
 
         $output(implode(': ', [$statusCode, $uri]));
 
-        if (false === strpos($headers['content-type'][0] ?? '', 'html')) {
+        if (isset($headers['content-type'][0]) && false === strpos($headers['content-type'][0], 'html')) {
             return;
         }
         try {

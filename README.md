@@ -1,6 +1,8 @@
 DarvinCrawlerBundle
 ===================
 
+This bundle provides console command that detects broken links on your website.
+
 ## Configuration
 
 ```yaml

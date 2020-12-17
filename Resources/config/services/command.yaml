@@ -6,6 +6,6 @@ services:
         class: '%darvin_crawler.command.crawl.class%'
         arguments:
             - '@darvin_crawler.crawler'
-            - '%darvin_crawler.uri%'
+            - '%darvin_crawler.default_uri%'
         tags:
             - { name: console.command }

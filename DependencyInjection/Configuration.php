@@ -26,7 +26,7 @@ class Configuration implements ConfigurationInterface
         $builder = new TreeBuilder('darvin_crawler');
         $builder->getRootNode()
             ->children()
-                ->scalarNode('uri')->defaultNull();
+                ->scalarNode('default_uri')->defaultNull();
 
         return $builder;
     }

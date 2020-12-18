@@ -7,3 +7,5 @@
 - Add readme.
 
 - Register HTTP client as a service.
+
+- Add blacklists.

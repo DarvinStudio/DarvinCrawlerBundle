@@ -3,12 +3,17 @@ DarvinCrawlerBundle
 
 This bundle provides console command that detects broken links on your website.
 
-## Configuration
+## Sample configuration
 
 ```yaml
 # config/packages/dev/darvin_crawler.yaml
 darvin_crawler:
-    default_uri: https://example.com
+    default_uri: https://example.com # Default value of command's "uri" argument
+    blacklists:
+        parse: # Content from URIs matching these regexes will not be parsed
+            - '/\/filtered\//'
+        visit: # URIs matching these regexes will not be visited
+            - '/\/filtered\//'
 ```
 
 ## Usage

@@ -93,22 +93,26 @@ class Crawler implements CrawlerInterface
     }
 
     /**
-     * @param string   $uri           URI
-     * @param callable $output        Output callback
-     * @param string   $websiteScheme Website scheme
-     * @param string   $websiteHost   Website host
-     * @param string[] $visited       Visited links
-     * @param string[] $broken        Broken links
+     * @param string      $uri           URI
+     * @param callable    $output        Output callback
+     * @param string      $websiteScheme Website scheme
+     * @param string      $websiteHost   Website host
+     * @param string[]    $visited       Visited links
+     * @param string[]    $broken        Broken links
+     * @param string|null $referer       Referer
      */
-    private function visit(string $uri, callable $output, string $websiteScheme, string $websiteHost, array &$visited, array &$broken): void
+    private function visit(string $uri, callable $output, string $websiteScheme, string $websiteHost, array &$visited, array &$broken, ?string $referer = null): void
     {
         $visited[] = $uri;
 
         $response = $this->client->request('GET', $uri);
 
-        $handleError = function (?\Throwable $ex, string $message = '') use ($uri, $output, &$broken): void {
+        $handleError = function (?\Throwable $ex, string $message = '') use ($uri, $output, &$broken, $referer): void {
             if ('' === $message) {
                 $message = implode(': ', [$uri, $ex->getMessage()]);
+            }
+            if (null !== $referer) {
+                $message .= sprintf(' (from %s)', $referer);
             }
 
             $output($message, true);
@@ -152,18 +156,19 @@ class Crawler implements CrawlerInterface
             return;
         }
 
-        $this->parse($html, $output, $websiteScheme, $websiteHost, $visited, $broken);
+        $this->parse($html, $uri, $output, $websiteScheme, $websiteHost, $visited, $broken);
     }
 
     /**
      * @param string   $html          HTML
+     * @param string   $uri           URI
      * @param callable $output        Output callback
      * @param string   $websiteScheme Website scheme
      * @param string   $websiteHost   Website host
      * @param string[] $visited       Visited links
      * @param string[] $broken        Broken links
      */
-    private function parse(string $html, callable $output, string $websiteScheme, string $websiteHost, array &$visited, array &$broken): void
+    private function parse(string $html, string $uri, callable $output, string $websiteScheme, string $websiteHost, array &$visited, array &$broken): void
     {
         /** @var \DOMElement[] $nodes */
         $nodes = (new \Symfony\Component\DomCrawler\Crawler($html))->filter(implode(', ', array_map(function (string $attribute): string {
@@ -200,7 +205,7 @@ class Crawler implements CrawlerInterface
                     && !in_array(rtrim($link, '/'), $visited)
                     && !$this->isBlacklisted($link, $this->visitBlacklist)
                 ) {
-                    $this->visit($link, $output, $websiteScheme, $websiteHost, $visited, $broken);
+                    $this->visit($link, $output, $websiteScheme, $websiteHost, $visited, $broken, $uri);
                 }
             }
         }

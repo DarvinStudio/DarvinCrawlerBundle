@@ -10,4 +10,8 @@
 
 - Add blacklists.
 
-6.0.3: Remove hashes from URLs.
+6.0.3: 
+
+- Remove hashes from URLs.
+
+- Add referer to error messages.

@@ -140,6 +140,16 @@ class Crawler implements CrawlerInterface
             return;
         }
 
+        $actualUri = $response->getInfo('url');
+
+        if (rtrim($actualUri, '/') !== rtrim($uri, '/')) {
+            $uri = $actualUri;
+
+            if (!$this->isVisitable($uri, $websiteHost, $visited)) {
+                return;
+            }
+        }
+
         $output(implode(': ', [$statusCode, $uri]));
 
         if (isset($headers['content-type'][0]) && false === strpos($headers['content-type'][0], 'html')) {
@@ -197,18 +207,26 @@ class Crawler implements CrawlerInterface
 
                     $link = sprintf('%s://%s%s', $scheme, $websiteHost, $link);
                 }
-
-                $host = parse_url($link, PHP_URL_HOST);
-
-                if ($host === $websiteHost
-                    && !in_array($link, $visited)
-                    && !in_array(rtrim($link, '/'), $visited)
-                    && !$this->isBlacklisted($link, $this->visitBlacklist)
-                ) {
+                if ($this->isVisitable($link, $websiteHost, $visited)) {
                     $this->visit($link, $output, $websiteScheme, $websiteHost, $visited, $broken, $uri);
                 }
             }
         }
+    }
+
+    /**
+     * @param string   $uri         URI
+     * @param string   $websiteHost Website host
+     * @param string[] $visited     Visited links
+     *
+     * @return bool
+     */
+    private function isVisitable(string $uri, string $websiteHost, array $visited): bool
+    {
+        return parse_url($uri, PHP_URL_HOST) === $websiteHost
+            && !in_array($uri, $visited)
+            && !in_array(rtrim($uri, '/'), $visited)
+            && !$this->isBlacklisted($uri, $this->visitBlacklist);
     }
 
     /**

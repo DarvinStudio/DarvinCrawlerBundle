@@ -15,3 +15,5 @@
 - Remove hashes from URLs.
 
 - Add referer to error messages.
+
+- Handle redirects.

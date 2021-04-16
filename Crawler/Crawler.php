@@ -176,7 +176,7 @@ class Crawler implements CrawlerInterface
                     continue;
                 }
 
-                $link = $node->getAttribute($attr);
+                $link = preg_replace('/#.*$/', '', $node->getAttribute($attr));
 
                 if ('' === $link) {
                     continue;

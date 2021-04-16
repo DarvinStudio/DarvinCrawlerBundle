@@ -9,3 +9,5 @@
 - Register HTTP client as a service.
 
 - Add blacklists.
+
+6.0.3: Remove hashes from URLs.

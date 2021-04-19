@@ -20,6 +20,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class Crawler implements CrawlerInterface
 {
+    private const DEFAULT_SCHEME = 'http';
+
     private const ATTRIBUTES = [
         'href',
         'src',
@@ -70,7 +72,7 @@ class Crawler implements CrawlerInterface
         $scheme = parse_url($uri, PHP_URL_SCHEME);
 
         if (null === $scheme) {
-            $scheme = 'http';
+            $scheme = self::DEFAULT_SCHEME;
 
             $uri = implode('://', [$scheme, $uri]);
         }
@@ -203,9 +205,9 @@ class Crawler implements CrawlerInterface
                     continue;
                 }
                 if (null === $scheme) {
-                    $scheme = $websiteScheme;
-
-                    $link = sprintf('%s://%s%s', $scheme, $websiteHost, $link);
+                    $link = preg_match('/^\/{2}[^\/]+/', $link)
+                        ? self::DEFAULT_SCHEME.$link
+                        : sprintf('%s://%s%s', $websiteScheme, $websiteHost, $link);
                 }
                 if ($this->isVisitable($link, $websiteHost, $visited)) {
                     $this->visit($link, $output, $websiteScheme, $websiteHost, $visited, $broken, $uri);

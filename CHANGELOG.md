@@ -17,3 +17,5 @@
 - Add referer to error messages.
 
 - Handle redirects.
+
+6.0.4: Properly handle "//example.com" like links.
